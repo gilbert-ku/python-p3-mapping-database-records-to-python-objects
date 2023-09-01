@@ -48,4 +48,45 @@ class Song:
         song.save()
         return song
 
-    # new code goes here!
+    @classmethod
+    def new_from_db(cls, row):
+        song = cls(row[1], row[2])
+        song.id = row[0]
+        return song
+
+    @classmethod
+    def get_all(cls):
+        cls.create_table()  # Ensure the table exists before fetching data.
+        sql = """
+            SELECT *
+            FROM songs
+        """
+
+        all_songs = CURSOR.execute(sql).fetchall()
+
+        cls.all = [cls.new_from_db(row) for row in all_songs]
+
+    @classmethod
+    def find_by_name(cls, name):
+        sql = """
+            SELECT *
+            FROM songs
+            WHERE name = ?
+            LIMIT 1
+        """
+
+        song = CURSOR.execute(sql, (name,)).fetchone()
+
+        return cls.new_from_db(song)
+
+# To populate the 'all' list with songs from the database:
+Song.get_all()
+
+# Now, you can access the songs in the 'all' list.
+for song in Song.all:
+    print(song.id, song.name, song.album)
+
+
+    
+
+
